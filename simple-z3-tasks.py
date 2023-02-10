@@ -12,16 +12,22 @@ def is_prime(n):
         return True
 
 
-def find_path(graph):
-    n = len(graph)  # number of nodes
+def independent_set(list_of_edges, num_nodes):
     solver = Solver()
-    nodes = [Bool(f"node_{i}") for i in range(n)]
+    nodes = [Bool("v%d" % i) for i in range(num_nodes)]
+    for i, j in list_of_edges:
+        solver.add(Or(Not(nodes[i]), Not(nodes[j])))
 
-    for i in range(n):
-        for j in range(n):
-            if graph[i][j] == 1:
-                solver.add(Implies(nodes[i], nodes[j]))  # adding edges
+    if solver.check() == sat:
+        # Get the optimal solution
+        model = solver.model()
+        # Print the vertices that are in the independent set
+        print("Vertices in the maximum independent set:", [i for i in range(num_nodes) if is_true(model[nodes[i]])])
+    else:
+        print("No solution found.")
 
 
 print(is_prime(25))  # False
 print(is_prime(13))  # True
+edges = [(1, 2), (1, 3), (2, 3), (3, 4), (4, 5), (4, 6)]
+independent_set(edges, 7)
